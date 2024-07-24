@@ -189,9 +189,25 @@
             color: #fff;
             display: none;
         }
+        .mute-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        .mute-button:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
     </style>
 </head>
 <body>
+    <button class="mute-button" onclick="toggleMute()">Mute</button>
     <div class="input-container" id="input-container">
         <label for="date">Select Date:</label>
         <input type="date" id="date">
@@ -238,8 +254,15 @@
             explosionChance: 0.4 // 40% chance to play explosion sound
         };
 
+        let isMuted = false;
+
         document.getElementById('countdown-title').textContent = settings.title;
         document.getElementById('end-text').textContent = settings.endText;
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            document.querySelector('.mute-button').textContent = isMuted ? 'Unmute' : 'Mute';
+        }
 
         function startCountdown() {
             let endDate;
@@ -345,7 +368,7 @@
             animateRocket(rocket);
             createSmokeTrail(rocket);
 
-            if (Math.random() < settings.whistleChance) {  
+            if (!isMuted && Math.random() < settings.whistleChance) {  
                 const audio = new Audio('https://raw.githubusercontent.com/AsafMeizner/AsafMeizner/master/files/firework.mp3');
                 audio.volume = settings.whistleVolume; 
                 audio.play().catch(error => {
@@ -372,8 +395,7 @@
                     createParticles(rocket);
                     rocket.remove();
 
-                    // Play explosion sound
-                    if (Math.random() < settings.explosionChance) {  
+                    if (!isMuted && Math.random() < settings.explosionChance) {  
                         const audio = new Audio('https://raw.githubusercontent.com/AsafMeizner/AsafMeizner/master/files/explosion.mp3');
                         audio.volume = settings.explosionVolume;  
                         audio.play().catch(error => {
