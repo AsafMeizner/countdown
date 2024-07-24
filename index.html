@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e90ff, #00fa9a);
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            overflow: hidden;
+        }
+        .countdown {
+            position: relative;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 50px 70px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            z-index: 2;
+            margin-bottom: 20px;
+        }
+        .countdown h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            font-weight: 700;
+            color: #ffeb3b;
+        }
+        .time {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 2rem;
+        }
+        .time div {
+            margin: 0 10px;
+            text-align: center;
+        }
+        .time span {
+            display: block;
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #ffeb3b, #ff6347);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.5s ease-in-out;
+        }
+        .label {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            color: #ffeb3b;
+            letter-spacing: 1px;
+        }
+        @keyframes numberChange {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes smoke-fade {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(2);
+            }
+        }
+        .rocket {
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            height: 60px;
+            background: url('https://media.forgecdn.net/avatars/thumbnails/246/465/256/256/637157407933276021.png') no-repeat center center;
+            background-size: cover;
+        }
+        .smoke {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: smoke-fade 1s forwards;
+        }
+        .particle {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            background: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            animation: particle-move 1.5s forwards;
+        }
+        @keyframes particle-move {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--x), var(--y));
+            }
+        }
+        .explosion {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, yellow, orange, red, black);
+            border-radius: 50%;
+            animation: nuke 2s forwards;
+            display: none;
+        }
+        @keyframes nuke {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(50);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(100);
+            }
+        }
+        .shockwave {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 5px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: shockwave 2s forwards;
+            display: none;
+        }
+        @keyframes shockwave {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(50);
+            }
+        }
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+        }
+        .input-container input, .input-container button {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 10px;
+            outline: none;
+        }
+        .input-container button {
+            background-color: #ff6347;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .input-container button:hover {
+            background-color: #ff4500;
+        }
+        .end-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: #fff;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="input-container" id="input-container">
+        <label for="date">Select Date:</label>
+        <input type="date" id="date">
+        <label for="time">Select Time:</label>
+        <input type="time" id="time">
+        <button onclick="startCountdown()">Start Countdown</button>
+    </div>
+    <div class="countdown" id="countdown" style="display:none;">
+        <h1 id="countdown-title"></h1>
+        <div class="time">
+            <div id="days-container">
+                <span id="days">00</span>
+                <div class="label">Days</div>
+            </div>
+            <div id="hours-container">
+                <span id="hours">00</span>
+                <div class="label">Hours</div>
+            </div>
+            <div id="minutes-container">
+                <span id="minutes">00</span>
+                <div class="label">Minutes</div>
+            </div>
+            <div id="seconds-container">
+                <span id="seconds">00</span>
+                <div class="label">Seconds</div>
+            </div>
+        </div>
+    </div>
+    <div class="fireworks"></div>
+    <div class="explosion" id="explosion"></div>
+    <div class="shockwave" id="shockwave"></div>
+    <div class="end-text" id="end-text"></div>
+    <script>
+        const settings = {
+            toggleIfAskUser: false,
+            fixedDateTime: '2024-07-25:00:16',
+            title: 'New Year Countdown',
+            endText: 'Happy New Year!',
+            isTimeout: false,
+            timeoutDuration: 60000, // 60 seconds
+            whistleVolume: 0.35, // 25% volume for firework whistle
+            explosionVolume: 0.9, // 90% volume for explosion
+            whistleChance: 0.15, // 15% chance to play firework whistle
+            explosionChance: 0.4 // 40% chance to play explosion sound
+        };
+
+        document.getElementById('countdown-title').textContent = settings.title;
+        document.getElementById('end-text').textContent = settings.endText;
+
+        function startCountdown() {
+            let endDate;
+            if (settings.toggleIfAskUser) {
+                const dateInput = document.getElementById('date').value;
+                const timeInput = document.getElementById('time').value;
+
+                if (!dateInput || !timeInput) {
+                    alert('Please select both date and time.');
+                    return;
+                }
+
+                endDate = new Date(`${dateInput}T${timeInput}:00`).getTime();
+            } else {
+                endDate = new Date(settings.fixedDateTime).getTime();
+            }
+
+            const now = new Date().getTime();
+            if (endDate < now) {
+                endDate = now + 3000; 
+            }
+
+            if (isNaN(endDate)) {
+                alert('Invalid date or time.');
+                return;
+            }
+
+            document.getElementById('input-container').style.display = 'none';
+            document.getElementById('countdown').style.display = 'block';
+
+            countdown(endDate);
+        }
+
+        function countdown(endDate) {
+            let timer;
+
+            timer = setInterval(function() {
+                const now = new Date().getTime();
+                const timeRemaining = endDate - now;
+
+                if (timeRemaining >= 0) {
+                    const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+                    document.getElementById("days").innerHTML = ("0" + days).slice(-2);
+                    document.getElementById("hours").innerHTML = ("0" + hours).slice(-2);
+                    document.getElementById("minutes").innerHTML = ("0" + minutes).slice(-2);
+                    document.getElementById("seconds").innerHTML = ("0" + seconds).slice(-2);
+
+                    if (timeRemaining <= 10000 && timeRemaining > 0) {
+                        document.getElementById('days-container').style.display = 'none';
+                        document.getElementById('hours-container').style.display = 'none';
+                        document.getElementById('minutes-container').style.display = 'none';
+                        document.getElementById('countdown').style.transform = 'scale(1.2)';
+                        document.querySelectorAll('.time span').forEach(span => {
+                            span.style.fontSize = '6rem';
+                            span.style.color = '#ff6347';
+                            span.style.animation = 'numberChange 0.5s ease-in-out';
+                        });
+                    }
+
+                    if (timeRemaining <= 1000) {
+                        clearInterval(timer);
+                        document.getElementById('countdown').style.display = 'none';
+                        triggerExplosion();
+                    }
+                } else {
+                    clearInterval(timer);
+                }
+            }, 1000);
+        }
+
+        function triggerExplosion() {
+            const explosion = document.getElementById('explosion');
+            const shockwave = document.getElementById('shockwave');
+            const endText = document.getElementById('end-text');
+            explosion.style.display = 'block';
+            shockwave.style.display = 'block';
+
+            explosion.addEventListener('animationend', () => {
+                explosion.style.display = 'none';
+                shockwave.style.display = 'none';
+                endText.style.display = 'block';
+                startFireworkShow();
+            });
+
+            shockwave.addEventListener('animationend', () => {
+                shockwave.style.display = 'none';
+            });
+        }
+
+        function createRocket() {
+            const rocket = document.createElement('div');
+            rocket.className = 'rocket';
+            rocket.style.left = `${Math.random() * 100}vw`;
+            rocket.style.bottom = '0';
+            rocket.angle = Math.random() * 10 - 5;
+            rocket.angleIncrement = (Math.random() - 0.5) * 0.2; 
+            rocket.targetHeight = Math.random() * 300 + 500; 
+            document.body.appendChild(rocket);
+            animateRocket(rocket);
+            createSmokeTrail(rocket);
+
+            if (Math.random() < settings.whistleChance) {  
+                const audio = new Audio('https://raw.githubusercontent.com/AsafMeizner/AsafMeizner/master/files/firework.mp3');
+                audio.volume = settings.whistleVolume; 
+                audio.play().catch(error => {
+                    console.error('Failed to play firework whistle audio:', error);
+                });
+            }
+        }
+
+        function animateRocket(rocket) {
+            let startTime = null;
+            function animate(time) {
+                if (!startTime) startTime = time;
+                const progress = time - startTime;
+                const distance = Math.min(progress / 2, rocket.targetHeight); 
+                const offsetX = Math.sin(rocket.angle * Math.PI / 180) * distance;
+                const offsetY = Math.cos(rocket.angle * Math.PI / 180) * distance;
+                const angle = Math.atan2(-offsetY, offsetX) * 180 / Math.PI + 90;
+                rocket.style.transform = `translate(${offsetX}px, -${offsetY}px) rotate(${angle}deg)`;
+                rocket.angle += rocket.angleIncrement;
+
+                if (distance < rocket.targetHeight) { 
+                    requestAnimationFrame(animate);
+                } else {
+                    createParticles(rocket);
+                    rocket.remove();
+
+                    // Play explosion sound
+                    if (Math.random() < settings.explosionChance) {  
+                        const audio = new Audio('https://raw.githubusercontent.com/AsafMeizner/AsafMeizner/master/files/explosion.mp3');
+                        audio.volume = settings.explosionVolume;  
+                        audio.play().catch(error => {
+                            console.error('Failed to play explosion audio:', error);
+                        });
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function createSmokeTrail(rocket) {
+            const smokeInterval = setInterval(() => {
+                const rocketRect = rocket.getBoundingClientRect();
+                if (rocketRect.top > 0 && rocketRect.left > 0) {
+                    const smoke = document.createElement('div');
+                    smoke.className = 'smoke';
+                    smoke.style.left = `${rocketRect.left + rocketRect.width / 2}px`;
+                    smoke.style.top = `${rocketRect.bottom}px`;
+                    document.body.appendChild(smoke);
+                    setTimeout(() => smoke.remove(), 1000);
+                }
+            }, 50);
+
+            setTimeout(() => clearInterval(smokeInterval), 2000);
+        }
+
+        function createParticles(rocket) {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            const rocketRect = rocket.getBoundingClientRect();
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = `${rocketRect.left + rocketRect.width / 2}px`;
+                particle.style.top = `${rocketRect.top + rocketRect.height / 2}px`;
+                particle.style.setProperty('--x', `${(Math.random() - 0.5) * 400}px`);
+                particle.style.setProperty('--y', `${(Math.random() - 0.5) * 400}px`);
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 1500);
+            }
+        }
+
+        function startFireworkShow() {
+            let fireworkShowInterval = setInterval(() => {
+                createRocket();
+            }, 250);
+
+            if (settings.isTimeout) {
+                setTimeout(() => clearInterval(fireworkShowInterval), settings.timeoutDuration);
+            }
+        }
+
+        if (!settings.toggleIfAskUser) {
+            startCountdown();
+        }
+    </script>
+</body>
+</html>
