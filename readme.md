@@ -7,5 +7,3 @@ Well, mainly i was bored, but also to have something lightwheight that is super 
 ![main screen](screenshots/countdown.png "Countdown Screen")
 
 ![ending fireworks](screenshots/ending.png "Ending Screen")
-
-# Your welcome to make contributions
