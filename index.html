@@ -215,7 +215,7 @@
 <body>
   <button class="mute-button" onclick="toggleMute()">Mute</button>
 
-  <!-- Container for user inputs (Date, Time, Colors) -->
+  <!-- Container for user inputs (Date, Time, Custom Text, Colors) -->
   <div class="input-container" id="input-container">
     <label for="date">Select Date:</label>
     <input type="date" id="date" />
@@ -223,19 +223,24 @@
     <label for="time">Select Time:</label>
     <input type="time" id="time" />
 
-    <!-- New color options -->
+    <!-- New fields to customize the text -->
+    <label for="customTitle">Enter Countdown Title:</label>
+    <input type="text" id="customTitle" placeholder="e.g. Birthday Countdown" />
+
+    <label for="customEndText">Enter End Text:</label>
+    <input type="text" id="customEndText" placeholder="e.g. Happy Birthday!" />
+
+    <!-- New color option for background -->
     <label for="bgColor">Pick Background Color:</label>
     <input type="color" id="bgColor" value="#1e90ff" />
 
-    <label for="textColor">Pick Text Color:</label>
-    <input type="color" id="textColor" value="#ffffff" />
-
-    <!-- Apply colors button -->
-    <button onclick="applyColors()">Apply Colors</button>
+    <!-- Apply changes button -->
+    <button onclick="applyCustomSettings()">Apply Custom Settings</button>
 
     <button onclick="startCountdown()">Start Countdown</button>
   </div>
 
+  <!-- Countdown container -->
   <div class="countdown" id="countdown" style="display: none;">
     <h1 id="countdown-title"></h1>
     <div class="time">
@@ -279,6 +284,7 @@
 
     let isMuted = false;
 
+    // Pre-fill with default text
     document.getElementById('countdown-title').textContent = settings.title;
     document.getElementById('end-text').textContent = settings.endText;
 
@@ -287,22 +293,22 @@
       document.querySelector('.mute-button').textContent = isMuted ? 'Unmute' : 'Mute';
     }
 
-    // Function to apply the background and text colors
-    function applyColors() {
+    // Function to apply custom text and background color
+    function applyCustomSettings() {
+      const customTitle = document.getElementById('customTitle').value.trim();
+      const customEndText = document.getElementById('customEndText').value.trim();
       const bgColor = document.getElementById('bgColor').value;
-      const textColor = document.getElementById('textColor').value;
 
-      // Change the body's background
+      // If the user entered a custom title, use it
+      if (customTitle) {
+        document.getElementById('countdown-title').textContent = customTitle;
+      }
+      // If the user entered custom end text, use it
+      if (customEndText) {
+        document.getElementById('end-text').textContent = customEndText;
+      }
+      // Change the body background to the chosen color
       document.body.style.background = bgColor;
-      // Change text color for body
-      document.body.style.color = textColor;
-
-      // Also update all .countdown text to user color
-      document.querySelectorAll('.countdown, .countdown *').forEach((elem) => {
-        elem.style.color = textColor;
-      });
-      // Make sure the .countdown container remains semi-transparent
-      document.querySelector('.countdown').style.background = 'rgba(0, 0, 0, 0.7)';
     }
 
     function startCountdown() {
@@ -470,7 +476,6 @@
           smoke.style.left = `${rocketRect.left + rocketRect.width / 2}px`;
           smoke.style.top = `${rocketRect.bottom}px`;
           document.body.appendChild(smoke);
-
           setTimeout(() => smoke.remove(), 1000);
         }
       }, 50);
@@ -504,7 +509,6 @@
         particle.style.backgroundColor =
           colors[Math.floor(Math.random() * colors.length)];
         document.body.appendChild(particle);
-
         setTimeout(() => particle.remove(), 1500);
       }
     }
